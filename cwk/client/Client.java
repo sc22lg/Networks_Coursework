@@ -3,10 +3,13 @@ import java.net.*;
 
 public class Client 
 {	
-	String command = null;
-	String fName = null;
+	static String command = null;
+	static String fName = null;
 
 	public void Client(){
+
+		PrintWriter socketOutput = null;
+		BufferedReader socketInput = null;
 
 		try{
 			int localhost_port = 9111;
@@ -18,12 +21,12 @@ public class Client
 			socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 		}
-		catch(IOExeption IOE){
-			System.out.println("IOExpection: %s", IOE);
+		catch(IOException IOE){
+			System.out.println(String.format("IOExpection: %s", IOE));
 		}
-		catch(UnknownHostException UHE){
-			System.out.println("UnknownHostException: %s", UHE);
-		}
+		/*catch(UnknownHostException UHE){
+			System.out.println(String.format("UnknownHostException: %s", UHE));
+		}*/
 
 		//creates request
 		String request = String.format("%s", command);
@@ -38,14 +41,12 @@ public class Client
 		//wait for server response
 		try
         {
+			String serverResponse = null;
 			while((serverResponse=socketInput.readLine()) != null){
 				// Echo server string.
 				System.out.println( "Server: " + serverResponse );
 			}
-          socketOutput.close();
-          socketInput.close();
-          stdIn.close();
-          kkSocket.close();
+			//put close statements below
         }
         catch (IOException e) {
             System.err.println("I/O exception during execution\n");
@@ -56,11 +57,12 @@ public class Client
 
 	public static void main( String[] args )
 	{
-		if(args[0] == "list"){
-			command = args[0]
+
+		if(args[0].equals("list")){
+			command = args[0];
 		}
-		else if(args[0] == "put"){
-			command = args[0]
+		else if(args[0].equals("put")){
+			command = args[0];
 			fName = args[1];
 		}
 		else{

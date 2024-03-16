@@ -63,12 +63,14 @@ public class Server
 
 		service = Executors.newFixedThreadPool(20);
 
-		running = true;
+		Socket clientSocket = null;
+
+		boolean running = true;
         while( running ){
 
 			try{
 				//wait for connection
-				Socket clientSocket = serverSock.accept();
+				clientSocket = serverSock.accept();
 			}
 			catch (IOException IOE) {
 				System.out.println( IOE );
@@ -88,7 +90,7 @@ public class Server
 				//separate request by whitespace
 				String[] splitRequest = inputRequest.split("\\s+");
 
-				if(splitRequest[0] == "list"){
+				if(splitRequest[0].equals("list")){
 					
 					//get list of files
 					String directoryPath = "serverFiles";
@@ -96,27 +98,31 @@ public class Server
 
 					//send list of files to client
 					for(int i = 0; i < fileList.size(); i++){
-						out.println(fileList[i]);
+						out.println(fileList.get(i));
 					}
 
 				}
-				else if(splitRequest[0] == "put"){
+				else if(splitRequest[0].equals("put")){
 
 					String requestedFName = splitRequest[1];
 					createNewFile(requestedFName);
 					FileWriter fWriter = new FileWriter(requestedFName);
 
-					while(inputRequest = in.readLine()){
+					inputRequest = in.readLine();
+					while((inputRequest != null)){
 						fWriter.write(inputRequest);
+						inputRequest = in.readLine();
 					}
 					fWriter.close();
 
 				}
 				else{
-
+					System.out.println("Invalid command");
 				}
-				
-
+			
+			}
+			catch (IOException IOE) {
+				System.out.println( IOE );
 			}
 		}
 	}
