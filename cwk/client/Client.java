@@ -34,6 +34,24 @@ public class Client
 		//send request to server
 		socketOutput.println(request);
 
+
+		//wait for server response
+		try
+        {
+			while((serverResponse=socketInput.readLine()) != null){
+				// Echo server string.
+				System.out.println( "Server: " + serverResponse );
+			}
+          socketOutput.close();
+          socketInput.close();
+          stdIn.close();
+          kkSocket.close();
+        }
+        catch (IOException e) {
+            System.err.println("I/O exception during execution\n");
+            System.exit(1);
+        }
+
 	}
 
 	public static void main( String[] args )

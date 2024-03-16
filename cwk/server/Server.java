@@ -101,7 +101,16 @@ public class Server
 
 				}
 				else if(splitRequest[0] == "put"){
+
 					String requestedFName = splitRequest[1];
+					createNewFile(requestedFName);
+					FileWriter fWriter = new FileWriter(requestedFName);
+
+					while(inputRequest = in.readLine()){
+						fWriter.write(inputRequest);
+					}
+					fWriter.close();
+
 				}
 				else{
 
