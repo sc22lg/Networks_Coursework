@@ -6,8 +6,12 @@ import java.util.*;
 public class Server 
 {	
 	public void createNewFile(String filename){
+
+		String currentDirectory = System.getProperty("user.dir");
+        String path = currentDirectory + File.separator + "serverFiles";
+
 		try {
-			File file = new File(filename);
+			File file = new File(path, filename);
 			if (file.createNewFile()) {
 				System.out.println("File created: " + file.getName());
 			} 
@@ -46,7 +50,7 @@ public class Server
 
 	public void Server(){
 
-		int localhost_port = 9111;
+		int localhost_port = 9201;
 		ServerSocket serverSock = null;
 		ExecutorService service = null;
 

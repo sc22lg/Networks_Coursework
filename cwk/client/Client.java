@@ -12,7 +12,7 @@ public class Client
 		BufferedReader socketInput = null;
 
 		try{
-			int localhost_port = 9111;
+			int localhost_port = 9201;
 			Socket socket = new Socket( "localhost", localhost_port );
 
 			//create output
@@ -30,13 +30,12 @@ public class Client
 
 		//creates request
 		String request = String.format("%s", command);
-		if(command == "put"){
+		if(command.equals("put")){
 			request += String.format(" %s", fName);
 		}
-		
+
 		//send request to server
 		socketOutput.println(request);
-
 
 		//wait for server response
 		try
