@@ -5,25 +5,31 @@ import java.util.*;
 
 public class Server 
 {	
-	public void createNewFile(String filename){
+	
+	public String currentDirectory = System.getProperty("user.dir");
+	public String path = currentDirectory + File.separator + "serverFiles" + File.separator;
 
-		String currentDirectory = System.getProperty("user.dir");
-        String path = currentDirectory + File.separator + "serverFiles";
+	//creates a new file and returns its location
+	public boolean createNewFile(String filename){
 
 		try {
-			File file = new File(path, filename);
+			File file = new File(path + filename);
 			if (file.createNewFile()) {
 				System.out.println("File created: " + file.getName());
 			} 
 			else {
 				System.out.println("File already exists.");
+				return false;
 			}
 
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
+			//do nothing ofc it cant find the file it doesnt exist yet
 			System.out.println("An error occurred.");
-			e.printStackTrace();
+            e.printStackTrace();
+			return false;
 		}
-
+		return true;
 	}
 
 	private static List<String> listFilesInDirectory(String directoryPath) {
@@ -48,7 +54,7 @@ public class Server
         return fileList;
     }
 
-	public void Server(){
+	public void runServer(){
 
 		int localhost_port = 9201;
 		ServerSocket serverSock = null;
@@ -109,15 +115,24 @@ public class Server
 				else if(splitRequest[0].equals("put")){
 
 					String requestedFName = splitRequest[1];
-					createNewFile(requestedFName);
-					FileWriter fWriter = new FileWriter(requestedFName);
 
-					inputRequest = in.readLine();
-					while((inputRequest != null)){
-						fWriter.write(inputRequest);
+					//creates the file and then reads contents from input.
+					if(createNewFile(requestedFName)){
+
+						FileWriter fWriter = new FileWriter(path + requestedFName);
+
 						inputRequest = in.readLine();
+						while((inputRequest != null)){
+							fWriter.write(inputRequest);
+							fWriter.write("\n");
+							inputRequest = in.readLine();
+						}
+						fWriter.close();
+						out.println(String.format("Uploaded file '%s'", requestedFName));
 					}
-					fWriter.close();
+					else{
+						out.println(String.format("Error: Cannot upload file '%s'; already exists on server", requestedFName));
+					}
 
 				}
 				else{
@@ -134,6 +149,6 @@ public class Server
 	public static void main( String[] args )
 	{
 		Server server = new Server();
-		server.Server();
+		server.runServer();
 	}
 }
