@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.*;
 import java.util.*;
 
@@ -8,6 +10,29 @@ public class Server
 	
 	public String currentDirectory = System.getProperty("user.dir");
 	public String path = currentDirectory + File.separator + "serverFiles" + File.separator;
+
+	public void updateLog(InetAddress inet, String request){
+		
+		String gap = " | ";
+
+		//get date and time
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyy | HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        String dateTimeString = now.format(formatter);
+
+		//get client IP
+		String clientIPAddress = inet.getHostAddress();
+
+		//open the file writer, giving to true to indicate the file already exists
+		try{FileWriter fWriter = new FileWriter(path + "log.txt", true);
+
+			fWriter.append(dateTimeString + gap + clientIPAddress + gap + request + "\n");
+			fWriter.close();
+		}
+		catch(IOException e){
+
+		}
+	}
 
 	//creates a new file and returns its location
 	public boolean createNewFile(String filename){
@@ -89,7 +114,6 @@ public class Server
 			try{
 				//get clientSocket info
 				InetAddress inet = clientSocket.getInetAddress();
-                Date date = new Date();
 
 				//open reader/writer for client request
 				PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -110,7 +134,7 @@ public class Server
 					for(int i = 0; i < fileList.size(); i++){
 						out.println(fileList.get(i));
 					}
-
+					updateLog(inet, splitRequest[0]);
 				}
 				else if(splitRequest[0].equals("put")){
 
@@ -128,6 +152,9 @@ public class Server
 							inputRequest = in.readLine();
 						}
 						fWriter.close();
+
+						updateLog(inet, splitRequest[0]);
+						//send confirmation to client
 						out.println(String.format("Uploaded file '%s'", requestedFName));
 					}
 					else{
