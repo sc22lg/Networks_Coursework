@@ -6,6 +6,11 @@ public class Client
 	static String command = null;
 	static String fName = null;
 
+	public static boolean doesFileExist(String filename) {
+        File file = new File(filename);
+        return file.exists();
+    }
+
 	public void runClient(){
 
 		PrintWriter socketOutput = null;
@@ -24,14 +29,18 @@ public class Client
 		catch(IOException IOE){
 			System.out.println(String.format("IOExpection: %s", IOE));
 		}
-		/*catch(UnknownHostException UHE){
-			System.out.println(String.format("UnknownHostException: %s", UHE));
-		}*/
 
 		//creates request
 		String request = String.format("%s", command);
 		if(command.equals("put")){
-			request += String.format(" %s", fName);
+			//test if file exists
+			if(doesFileExist(fName)){
+				request += String.format(" %s", fName);
+			}
+			else{
+				System.out.println(String.format("Error: Cannot open local file '%s' for reading.", fName));
+				return;
+			}
 		}
 
 		//send request to server
@@ -87,6 +96,7 @@ public class Client
 		}
 		else{
 			System.out.println("Invalid arguments.");
+			return;
 		}
 
 		Client client = new Client();
