@@ -87,7 +87,7 @@ public class Server
 
 		//create the log file
 		createNewFile("log.txt");
-		
+
 		try {
 			serverSock = new ServerSocket(localhost_port);
 		}
@@ -140,6 +140,10 @@ public class Server
 							//creates the file and then reads contents from input.
 							if(createNewFile(requestedFName)){
 
+								updateLog(inet, splitRequest[0]);
+								//send confirmation to client
+								out.println(String.format("Uploaded file '%s'", requestedFName));
+
 								FileWriter fWriter = new FileWriter(path + requestedFName);
 
 								inputRequest = in.readLine();
@@ -150,9 +154,6 @@ public class Server
 								}
 								fWriter.close();
 
-								updateLog(inet, splitRequest[0]);
-								//send confirmation to client
-								out.println(String.format("Uploaded file '%s'", requestedFName));
 							}
 							else{
 								out.println(String.format("Error: Cannot upload file '%s'; already exists on server", requestedFName));
