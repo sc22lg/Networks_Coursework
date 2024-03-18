@@ -6,7 +6,7 @@ public class Client
 	static String command = null;
 	static String fName = null;
 
-	public void Client(){
+	public void runClient(){
 
 		PrintWriter socketOutput = null;
 		BufferedReader socketInput = null;
@@ -37,20 +37,41 @@ public class Client
 		//send request to server
 		socketOutput.println(request);
 
+		//writes the file to the socket output
+		if(command.equals("put")){
+			
+			try(BufferedReader reader = new BufferedReader(new FileReader(fName))){
+
+				String line;
+				while ((line = reader.readLine()) != null) {
+					// Write each line read from input file to the PrintWriter 'out'
+					socketOutput.println(line);
+            	}
+
+			}
+			catch(IOException IOE){
+				System.out.println(String.format("Error: Cannot open local file '%s' for reading", fName));
+			}
+
+		}
+
 		//wait for server response
+
 		try
-        {
+		{
 			String serverResponse = null;
 			while((serverResponse=socketInput.readLine()) != null){
 				// Echo server string.
 				System.out.println( "Server: " + serverResponse );
 			}
+
 			//put close statements below
-        }
-        catch (IOException e) {
-            System.err.println("I/O exception during execution\n");
-            System.exit(1);
-        }
+		}
+		catch (IOException e) {
+			System.err.println("I/O exception during execution\n");
+			System.exit(1);
+		}
+
 
 	}
 
@@ -69,6 +90,6 @@ public class Client
 		}
 
 		Client client = new Client();
-		client.Client();
+		client.runClient();
 	}
 }
