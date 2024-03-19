@@ -11,24 +11,20 @@ public class Client
         return file.exists();
     }
 
+	public void closeClient(Socket socket){
+		try{
+			socket.close();
+			System.exit(0);
+		}
+		catch(IOException IOE){
+			System.exit(0);
+		}
+	}
+
 	public void runClient(){
 
 		PrintWriter socketOutput = null;
 		BufferedReader socketInput = null;
-
-		try{
-			int localhost_port = 9201;
-			Socket socket = new Socket( "localhost", localhost_port );
-
-			//create output
-			socketOutput = new PrintWriter(socket.getOutputStream(), true);
-			//create input
-			socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-		}
-		catch(IOException IOE){
-			System.out.println(String.format("IOExpection: %s", IOE));
-		}
 
 		//creates request
 		String request = String.format("%s", command);
@@ -39,9 +35,27 @@ public class Client
 			}
 			else{
 				System.out.println(String.format("Error: Cannot open local file '%s' for reading.", fName));
-				return;
+				System.exit(0);
 			}
 		}
+
+		//connect to server
+		Socket socket = null;
+		try{
+			int localhost_port = 9201;
+			socket = new Socket( "localhost", localhost_port );
+
+			//create output
+			socketOutput = new PrintWriter(socket.getOutputStream(), true);
+			//create input
+			socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+		}
+		catch(IOException IOE){
+			System.out.println(String.format("IOExpection: %s", IOE));
+			closeClient(socket);
+		}
+
 
 		//send request to server
 		socketOutput.println(request);
@@ -56,20 +70,23 @@ public class Client
 					// Write each line read from input file to the PrintWriter 'out'
 					socketOutput.println(line);
             	}
+				socketOutput.println(line);
 
 			}
 			catch(IOException IOE){
 				System.out.println(String.format("Error: Cannot open local file '%s' for reading", fName));
+				closeClient(socket);
 			}
 
 		}
 
-		//wait for server response
-
+		//wait for server responses
 		try
 		{
 			String serverResponse = null;
 			while((serverResponse=socketInput.readLine()) != null){
+				// Check if end of mesage
+				if(serverResponse.equals("end")){System.out.println( "END RECIVED" );closeClient(socket); break;}
 				// Echo server string.
 				System.out.println( "Server: " + serverResponse );
 			}
@@ -78,10 +95,9 @@ public class Client
 		}
 		catch (IOException e) {
 			System.err.println("I/O exception during execution\n");
-			System.exit(1);
+			closeClient(socket);
 		}
-
-
+		
 	}
 
 	public static void main( String[] args )

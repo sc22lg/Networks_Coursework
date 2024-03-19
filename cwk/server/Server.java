@@ -131,6 +131,7 @@ public class Server
 							for(int i = 0; i < fileList.size(); i++){
 								out.println(fileList.get(i));
 							}
+                            out.println("end");
 							updateLog(inet, splitRequest[0]);
 						}
 						else if(splitRequest[0].equals("put")){
@@ -148,15 +149,18 @@ public class Server
 
 								inputRequest = in.readLine();
 								while((inputRequest != null)){
+                                    if(inputRequest.equals("end")){System.out.println( "END RECIVED" );break;}
 									fWriter.write(inputRequest);
 									fWriter.write("\n");
 									inputRequest = in.readLine();
 								}
+                                out.println("end");
 								fWriter.close();
 
 							}
 							else{
 								out.println(String.format("Error: Cannot upload file '%s'; already exists on server", requestedFName));
+                                out.println("end");
 							}
 
 						}
