@@ -24,7 +24,7 @@ public class Server
 		String clientIPAddress = inet.getHostAddress();
 
 		//open the file writer, giving to true to indicate the file already exists
-		try{FileWriter fWriter = new FileWriter(path + "log.txt", true);
+		try{FileWriter fWriter = new FileWriter("log.txt", true);
 
 			fWriter.append(dateTimeString + gap + clientIPAddress + gap + request + "\n");
 			fWriter.close();
@@ -86,7 +86,12 @@ public class Server
 		ServerSocket serverSock = null;
 
 		//create the log file
-		createNewFile("log.txt");
+        File logFile = new File("log.txt");
+        try{
+            logFile.createNewFile();
+        }
+        catch(IOException IOE){System.exit(-1);}
+
 
 		try {
 			serverSock = new ServerSocket(localhost_port);
@@ -127,7 +132,9 @@ public class Server
 							String directoryPath = "serverFiles";
 							List<String> fileList = listFilesInDirectory(directoryPath);
 
-							//send list of files to client
+							//send number of files to client
+                            out.println(String.format("%d", fileList.size()));
+                            //send list of files to client
 							for(int i = 0; i < fileList.size(); i++){
 								out.println(fileList.get(i));
 							}
@@ -161,6 +168,7 @@ public class Server
 
 							}
 							else{
+                                updateLog(inet, splitRequest[0]);
 								out.println(String.format("Error: Cannot upload file '%s'; already exists on server", requestedFName));
                                 out.println("end");
 							}

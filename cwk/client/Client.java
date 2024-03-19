@@ -84,11 +84,16 @@ public class Client
 		try
 		{
 			String serverResponse = null;
+			if(command.equals("list")){//expects number of files from server first
+				serverResponse=socketInput.readLine();
+				System.out.println("Listing " + serverResponse + " file(s)");
+			}
+			//gets rest of file names
 			while((serverResponse=socketInput.readLine()) != null){
 				// Check if end of mesage
 				if(serverResponse.equals("end")){closeClient(socket); break;}
 				// Echo server string.
-				System.out.println( "Server: " + serverResponse );
+				System.out.println( serverResponse );
 			}
 
 			//put close statements below
