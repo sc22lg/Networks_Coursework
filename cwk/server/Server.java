@@ -40,10 +40,10 @@ public class Server
 		try {
 			File file = new File(path + filename);
 			if (file.createNewFile()) {
-				System.out.println("File created: " + file.getName());
+				//System.out.println("File created: " + file.getName());
 			} 
 			else {
-				System.out.println("File already exists.");
+				//System.out.println("File already exists.");
 				return false;
 			}
 
@@ -148,11 +148,13 @@ public class Server
 								FileWriter fWriter = new FileWriter(path + requestedFName);
 
 								inputRequest = in.readLine();
-								while((inputRequest != null)){
-                                    if(inputRequest.equals("end")){System.out.println( "END RECIVED" );break;}
-									fWriter.write(inputRequest);
-									fWriter.write("\n");
-									inputRequest = in.readLine();
+								while(!inputRequest.equals("end")){
+                                    
+									fWriter.write(inputRequest); //write line to file
+									inputRequest = in.readLine(); //get next line
+                                    if(!inputRequest.equals("end")){ //if the line isnt the end then write a newline
+                                        fWriter.write("\n");
+                                    }
 								}
                                 out.println("end");
 								fWriter.close();

@@ -70,7 +70,7 @@ public class Client
 					// Write each line read from input file to the PrintWriter 'out'
 					socketOutput.println(line);
             	}
-				socketOutput.println(line);
+				socketOutput.println("end");
 
 			}
 			catch(IOException IOE){
@@ -86,7 +86,7 @@ public class Client
 			String serverResponse = null;
 			while((serverResponse=socketInput.readLine()) != null){
 				// Check if end of mesage
-				if(serverResponse.equals("end")){System.out.println( "END RECIVED" );closeClient(socket); break;}
+				if(serverResponse.equals("end")){closeClient(socket); break;}
 				// Echo server string.
 				System.out.println( "Server: " + serverResponse );
 			}
