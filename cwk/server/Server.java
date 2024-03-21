@@ -124,7 +124,7 @@ public class Server
 					FileWriter fWriter = new FileWriter(path + requestedFName);
 
 					inputRequest = in.readLine();
-					while(!inputRequest.equals("\r")){
+					while(!inputRequest.equals(endofProtocol)){
 						
 						fWriter.write(inputRequest); //write line to file
 						inputRequest = in.readLine(); //get next line
