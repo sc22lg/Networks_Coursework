@@ -10,6 +10,7 @@ public class Server
 	
 	public String currentDirectory = System.getProperty("user.dir");
 	public String path = currentDirectory + File.separator + "serverFiles" + File.separator;
+	static String endofProtocol = "<>?!~~~///ENDOFPROTOCOL///~~~!?<>:)"; //string at the end of every client-server message
 
 	public void updateLog(InetAddress inet, String request){
 		
@@ -79,7 +80,81 @@ public class Server
         return fileList;
     }
 
-	public void runServer(){
+	public void handleClient(Socket clientSocket){
+
+		try{
+			//get clientSocket info
+			InetAddress inet = clientSocket.getInetAddress();
+
+			//open reader/writer for client request
+			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+			//read in request
+			String inputRequest = in.readLine();
+			//separate request by whitespace
+			String[] splitRequest = inputRequest.split("\\s+");
+
+			if(splitRequest[0].equals("list")){
+				
+				//get list of files
+				String directoryPath = "serverFiles";
+				List<String> fileList = listFilesInDirectory(directoryPath);
+
+				//send number of files to client
+				out.println(String.format("%d", fileList.size()));
+				//send list of files to client
+				for(int i = 0; i < fileList.size(); i++){
+					out.println(fileList.get(i));
+				}
+				out.println(endofProtocol);
+				updateLog(inet, splitRequest[0]);
+			}
+			else if(splitRequest[0].equals("put")){
+
+				String requestedFName = splitRequest[1];
+
+				//creates the file and then reads contents from input.
+				if(createNewFile(requestedFName)){
+
+					updateLog(inet, splitRequest[0]);
+					//send confirmation to client
+					out.println(String.format("Uploaded file '%s'", requestedFName));
+
+					FileWriter fWriter = new FileWriter(path + requestedFName);
+
+					inputRequest = in.readLine();
+					while(!inputRequest.equals("\r")){
+						
+						fWriter.write(inputRequest); //write line to file
+						inputRequest = in.readLine(); //get next line
+						if(!inputRequest.equals(endofProtocol)){ //if the line isnt the end then write a newline
+							fWriter.write("\n");
+						}
+					}
+					out.println(endofProtocol);
+					fWriter.close();
+
+				}
+				else{
+					updateLog(inet, splitRequest[0]);
+					out.println(String.format("Error: Cannot upload file '%s'; already exists on server", requestedFName));
+					out.println(endofProtocol);
+				}
+
+			}
+			else{
+				System.out.println("Invalid command");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void main( String[] args )
+	{
+		Server server = new Server();
 
 		//initial setup
 		int localhost_port = 9201;
@@ -112,76 +187,8 @@ public class Server
 				Socket clientSocket = serverSock.accept();
 
 				service.execute(() -> {
-
-					try{
-						//get clientSocket info
-						InetAddress inet = clientSocket.getInetAddress();
-
-						//open reader/writer for client request
-						PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-						BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-						//read in request
-						String inputRequest = in.readLine();
-						//separate request by whitespace
-						String[] splitRequest = inputRequest.split("\\s+");
-
-						if(splitRequest[0].equals("list")){
-							
-							//get list of files
-							String directoryPath = "serverFiles";
-							List<String> fileList = listFilesInDirectory(directoryPath);
-
-							//send number of files to client
-                            out.println(String.format("%d", fileList.size()));
-                            //send list of files to client
-							for(int i = 0; i < fileList.size(); i++){
-								out.println(fileList.get(i));
-							}
-                            out.println("end");
-							updateLog(inet, splitRequest[0]);
-						}
-						else if(splitRequest[0].equals("put")){
-
-							String requestedFName = splitRequest[1];
-
-							//creates the file and then reads contents from input.
-							if(createNewFile(requestedFName)){
-
-								updateLog(inet, splitRequest[0]);
-								//send confirmation to client
-								out.println(String.format("Uploaded file '%s'", requestedFName));
-
-								FileWriter fWriter = new FileWriter(path + requestedFName);
-
-								inputRequest = in.readLine();
-								while(!inputRequest.equals("end")){
-                                    
-									fWriter.write(inputRequest); //write line to file
-									inputRequest = in.readLine(); //get next line
-                                    if(!inputRequest.equals("end")){ //if the line isnt the end then write a newline
-                                        fWriter.write("\n");
-                                    }
-								}
-                                out.println("end");
-								fWriter.close();
-
-							}
-							else{
-                                updateLog(inet, splitRequest[0]);
-								out.println(String.format("Error: Cannot upload file '%s'; already exists on server", requestedFName));
-                                out.println("end");
-							}
-
-						}
-						else{
-							System.out.println("Invalid command");
-						}
-					} catch (IOException e) {
-                        e.printStackTrace();
-                    }
+					server.handleClient(clientSocket);
 				});
-
 			}
 			catch (IOException IOE) {
 				System.out.println( IOE );
@@ -189,11 +196,5 @@ public class Server
 
 
 		}
-	}
-
-	public static void main( String[] args )
-	{
-		Server server = new Server();
-		server.runServer();
 	}
 }

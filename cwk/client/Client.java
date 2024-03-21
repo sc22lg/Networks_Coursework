@@ -5,6 +5,7 @@ public class Client
 {	
 	static String command = null;
 	static String fName = null;
+	static String endofProtocol = "<>?!~~~///ENDOFPROTOCOL///~~~!?<>:)"; //string at the end of every client-server message
 
 	public static boolean doesFileExist(String filename) {
         File file = new File(filename);
@@ -70,7 +71,7 @@ public class Client
 					// Write each line read from input file to the PrintWriter 'out'
 					socketOutput.println(line);
             	}
-				socketOutput.println("end");
+				socketOutput.println(endofProtocol);
 
 			}
 			catch(IOException IOE){
@@ -91,7 +92,7 @@ public class Client
 			//gets rest of file names
 			while((serverResponse=socketInput.readLine()) != null){
 				// Check if end of mesage
-				if(serverResponse.equals("end")){closeClient(socket); break;}
+				if(serverResponse.equals(endofProtocol)){closeClient(socket); break;}
 				// Echo server string.
 				System.out.println( serverResponse );
 			}
